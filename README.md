@@ -1,36 +1,85 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🔒 LockD: Decentralized Commitment Protocol
 
-## Getting Started
+> **"Your assets, held hostage by your discipline."**
 
-First, run the development server:
+LockD is a Web3 productivity enforcer that uses **Loss Aversion psychology** to cure procrastination. Users stake crypto assets into a Smart Contract to lock a commitment. If they fail to check in, the assets are frozen.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 🚩 The Problem
+Self-discipline is hard because there are no immediate consequences for skipping a day. Most habit trackers are passive; they only show you what you missed.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### ⚡ The Solution
+LockD moves the pain of failure to the present. We don't just track your habits; **we take your crypto hostage.** You only get it back if you complete your streak.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 🏆 Key Features (Why LockD?)
 
-## Learn More
+Unlike generic habit trackers, LockD implements **Game Theory** mechanics directly on-chain:
 
-To learn more about Next.js, take a look at the following resources:
+### 1. 💀 Sudden Death Mechanism
+There are no "partial" failures. If you miss your check-in window (> 24 hours + grace period), your status flips to **FROZEN** immediately via passive logic checks.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 2. ❄️ Hostaged Stake & Redemption Arc
+A frozen pledge isn't lost... yet.
+* **The Freeze:** Your funds are locked. You cannot withdraw.
+* **The Redemption:** You are forced into a **3-Day Redemption Mission**.
+* **The Cost:** If you succeed in redemption, you only recover **80%** of your funds (20% penalty goes to the protocol). If you fail again? **100% Liquidation.**
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### 3. ⛽ Gas-Optimized Architecture
+Built for efficiency. The Smart Contract uses **Variable Packing** (fitting `address`, `uint96`, `uint40`, and `enums` into just 2 storage slots) to minimize gas costs for users while maintaining complex state logic.
 
-## Deploy on Vercel
+### 4. 🛡️ Trustless Verification
+* **No Backend required:** Core logic lives entirely on EVM.
+* **Anti-Cheat:** Enforces minimum cooldowns (cannot spam check-ins) and maximum session durations.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+---
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## ⚙️ How It Works
+
+1.  **Commit:** User selects a duration (1, 3, or 7 days) and stakes crypto (e.g., $5 USDC).
+2.  **Focus:** User completes offline tasks and clicks "Check-In" daily.
+3.  **Validation:** Smart Contract verifies the `block.timestamp` against the `lastCheckIn` time.
+4.  **Settlement:**
+    * **Success:** Withdraw 100% of Stake.
+    * **Late:** Assets Frozen -> User must start **Redemption**.
+    * **Abandon:** Anyone can trigger `liquidateAbandonedPledge()` to clear stale states.
+
+---
+
+## 🛠 Tech Stack
+
+* **Smart Contract:** Solidity (OpenZeppelin ReentrancyGuard, IERC20).
+* **Frontend:** Next JS, TailwindCSS.
+* **Web3 Integration:** Wagmi, Viem.
+* **Network:** Arbitrum Sepolia
+
+---
+
+## 🚀 Deployment Info
+
+* **Contract Address:** `0x9a911648a0e069d1D8198Db9E30a50d6f4269a48`
+* **Network:** `ArbitrumSepolia`
+* **Token Used:** `ETH`
+
+---
+
+## 📦 Local Development
+
+1.  **Clone the repo**
+    ```bash
+    git clone [https://github.com/lordsans-404/lockd.git](https://github.com/lordsans-404/lockd.git)
+    ```
+
+2.  **Install dependencies**
+    ```bash
+    npm install
+    ```
+
+3.  **Run frontend**
+    ```bash
+    npm run dev
+    ```
+
+---
+
+*Built by Lordsans-404*

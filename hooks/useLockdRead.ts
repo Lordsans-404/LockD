@@ -3,7 +3,7 @@
 import { useReadContract } from "wagmi";
 import { LOCKD_ABI, LOCKD_ADDRESS } from "@/config/contract";
 
-const STATUS_MAP = [
+export const STATUS_MAP = [
   "ACTIVE",
   "FROZEN",
   "REDEEMING",
@@ -21,7 +21,7 @@ type PledgeTuple = readonly [
   number,        // sessionDuration
   number,        // targetDays
   number,        // completedDays
-  number         // status
+  number,        // status
 ];
 
 function mapStatus(status: number): Status {
@@ -34,19 +34,23 @@ export function useLockDRead(pledgeId?: bigint) {
   const nextPledgeId = useReadContract({
     abi: LOCKD_ABI,
     address: LOCKD_ADDRESS,
-    functionName: "nextPledgeId",
+    functionName: "pledges",
+    args: [pledgeId],
+    query: { refetchOnWindowFocus: false },
   });
 
   const devWallet = useReadContract({
     abi: LOCKD_ABI,
     address: LOCKD_ADDRESS,
     functionName: "devWallet",
+    query: { refetchOnWindowFocus: false },
   });
 
   const signerWallet = useReadContract({
     abi: LOCKD_ABI,
     address: LOCKD_ADDRESS,
     functionName: "signerWallet",
+    query: { refetchOnWindowFocus: false },
   });
 
   /* ---------------- CONSTANTS ---------------- */
@@ -55,12 +59,35 @@ export function useLockDRead(pledgeId?: bigint) {
     abi: LOCKD_ABI,
     address: LOCKD_ADDRESS,
     functionName: "COOLDOWN",
+    query: { refetchOnWindowFocus: false, staleTime: Infinity },
   });
 
   const gracePeriod = useReadContract({
     abi: LOCKD_ABI,
     address: LOCKD_ADDRESS,
     functionName: "GRACE_PERIOD",
+    query: { refetchOnWindowFocus: false, staleTime: Infinity },
+  });
+
+  const minStake = useReadContract({
+    abi: LOCKD_ABI,
+    address: LOCKD_ADDRESS,
+    functionName: "MIN_STAKE",
+    query: { refetchOnWindowFocus: false, staleTime: Infinity },
+  });
+
+  const minSessionDuration = useReadContract({
+    abi: LOCKD_ABI,
+    address: LOCKD_ADDRESS,
+    functionName: "MIN_SESSION_DURATION",
+    query: { refetchOnWindowFocus: false, staleTime: Infinity },
+  });
+
+  const maxSessionDuration = useReadContract({
+    abi: LOCKD_ABI,
+    address: LOCKD_ADDRESS,
+    functionName: "MAX_SESSION_DURATION",
+    query: { refetchOnWindowFocus: false, staleTime: Infinity },
   });
 
   /* ---------------- PER-PLEDGE ---------------- */
@@ -70,7 +97,10 @@ export function useLockDRead(pledgeId?: bigint) {
     address: LOCKD_ADDRESS,
     functionName: "pledges",
     args: pledgeId !== undefined ? [pledgeId] : undefined,
-    query: { enabled: pledgeId !== undefined },
+    query: {
+      enabled: pledgeId !== undefined,
+      refetchOnWindowFocus: false
+    },
   });
 
   const pledgeData = pledge.data as PledgeTuple | undefined;
@@ -88,7 +118,7 @@ export function useLockDRead(pledgeId?: bigint) {
   const canCheckIn =
     status === "ACTIVE" || status === "REDEEMING"
       ? lastCheckIn === 0 ||
-        now >= lastCheckIn + Number(cooldown.data ?? 0)
+      now >= lastCheckIn + Number(cooldown.data ?? 0)
       : false;
 
   /* ---------------- RETURN API ---------------- */
@@ -102,6 +132,9 @@ export function useLockDRead(pledgeId?: bigint) {
     /* constants */
     cooldown: cooldown.data,
     gracePeriod: gracePeriod.data,
+    minStake: minStake.data,
+    minSessionDuration: minSessionDuration.data,
+    maxSessionDuration: maxSessionDuration.data,
 
     /* pledge */
     pledge: pledgeData && {
@@ -118,13 +151,8 @@ export function useLockDRead(pledgeId?: bigint) {
     /* derived */
     canCheckIn,
 
-    /* loading */
-    isLoading:
-      nextPledgeId.isLoading ||
-      devWallet.isLoading ||
-      signerWallet.isLoading ||
-      cooldown.isLoading ||
-      gracePeriod.isLoading ||
-      pledge.isLoading,
+    // Granular Loading States
+    isPledgeLoading: pledge.isLoading && pledge.fetchStatus !== 'idle',
+    isConstantsLoading: cooldown.isLoading || gracePeriod.isLoading || minStake.isLoading || minSessionDuration.isLoading || maxSessionDuration.isLoading,
   };
 }
