@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import { useState, useEffect, useMemo } from 'react';
 import { useAccount, useReadContracts } from 'wagmi';
