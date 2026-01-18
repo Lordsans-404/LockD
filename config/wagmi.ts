@@ -1,6 +1,5 @@
-// config/wagmi.ts
 import { http, createConfig, cookieStorage, createStorage } from 'wagmi'
-import { baseSepolia } from 'wagmi/chains'
+import { baseSepolia, arbitrumSepolia } from 'wagmi/chains'
 import { injected, walletConnect } from 'wagmi/connectors'
 
 // 1. Dapatkan Project ID dari WalletConnect Cloud (Gratis)
@@ -8,7 +7,7 @@ import { injected, walletConnect } from 'wagmi/connectors'
 const projectId = process.env.NEXT_PUBLIC_PROJECT_ID || 'public_project_id'
 
 export const config = createConfig({
-  chains: [baseSepolia], // Chain yang kita dukung
+  chains: [baseSepolia, arbitrumSepolia], // Chain yang kita dukung
   ssr: true,
   storage: createStorage({
     storage: cookieStorage, // Agar status wallet persisten saat refresh
@@ -19,5 +18,6 @@ export const config = createConfig({
   ],
   transports: {
     [baseSepolia.id]: http(), // RPC Provider
+    [arbitrumSepolia.id]: http(),
   },
 })
