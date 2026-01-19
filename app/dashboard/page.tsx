@@ -48,13 +48,31 @@ export default function LockDDashboard() {
     }
   };
 
-  // Error Handler Helper
+  // Error Handler Helper - User-friendly messages, technical details in console
   const handleError = (title: string, err: any) => {
     const msg = err.message || JSON.stringify(err);
+
+    // Always log full error to console for debugging
+    console.error(`[${title}]`, err);
+
     if (msg.includes("User rejected") || msg.includes("User denied")) {
       addNotification(title, "Transaction was cancelled", "info");
+    } else if (msg.includes("ContractFunctionExecutionError") || msg.includes("reverted") || msg.includes("Internal JSON-RPC")) {
+      // Contract/RPC errors - show friendly retry message
+      addNotification(
+        "⚠️ Network Busy",
+        "Please wait a moment and try again. The network might be congested.",
+        "warning"
+      );
+    } else if (msg.includes("insufficient funds")) {
+      addNotification(title, "Insufficient funds for this transaction", "error");
     } else {
-      addNotification(title, msg, "error");
+      // Generic fallback - still friendly
+      addNotification(
+        "⚠️ Something went wrong",
+        "Please try again in a few seconds.",
+        "warning"
+      );
     }
   };
 
@@ -250,13 +268,12 @@ export default function LockDDashboard() {
       localStorage.setItem(`lockd_session_${activePledgeId}`, JSON.stringify({ startTime }));
       setSessionStartTime(startTime);
       setSessionStatus('SESSION_RUNNING');
-      setSessionStatus('SESSION_RUNNING');
       addNotification("🎯 Session Started", "Focus mode is active. Good luck!", "info");
     } catch (err: any) { handleError("Start Failed", err); }
   };
 
   const handleCheckIn = async () => {
-    if (!activePledgeId) return;
+    if (!activePledgeId || isPending) return; // Prevent double-click
     try {
       const res = await fetch("/api/checkin-sign", {
         method: "POST",
@@ -267,7 +284,6 @@ export default function LockDDashboard() {
       const tx = await checkIn({ pledgeId: activePledgeId, signature });
 
       localStorage.removeItem(`lockd_session_${activePledgeId}`);
-      localStorage.removeItem(`lockd_session_${activePledgeId}`);
       const shortTx = `${tx.slice(0, 6)}...${tx.slice(-4)}`;
       addNotification("✅ Check-in Success", `Transaction sent: ${shortTx}`, "success", true);
       window.location.reload();
@@ -275,11 +291,10 @@ export default function LockDDashboard() {
   };
 
   const handleClaim = async () => {
-    if (!activePledgeId) return;
+    if (!activePledgeId || isPending) return; // Prevent double-click
     try {
       const tx = await claimPledge(activePledgeId);
 
-      localStorage.setItem('lockd_claim_success', 'true');
       localStorage.setItem('lockd_claim_success', 'true');
       const shortTx = `${tx.slice(0, 6)}...${tx.slice(-4)}`;
       addNotification("🎉 Claim Initiated", `Transaction sent: ${shortTx}`, "success", true);

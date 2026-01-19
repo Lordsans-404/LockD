@@ -20,6 +20,7 @@ export default function CreatePledgeModal({ onClose, onSuccess }: CreatePledgeMo
         sessionDuration: '',
         targetDays: 7 as 1 | 3 | 7,
     });
+    const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
     const { minStake, minSessionDuration, maxSessionDuration } = useLockDRead();
 
@@ -34,6 +35,7 @@ export default function CreatePledgeModal({ onClose, onSuccess }: CreatePledgeMo
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
+        setErrorMessage(null); // Clear previous errors
         try {
             if (!formData.stakeAmount || !formData.sessionDuration) return;
 
@@ -67,7 +69,17 @@ export default function CreatePledgeModal({ onClose, onSuccess }: CreatePledgeMo
             onSuccess();
         } catch (error: any) {
             console.error("Create Pledge Failed:", error);
-            alert(`Failed: ${error.message}`);
+            const msg = error.message || "";
+
+            if (msg.includes("User rejected") || msg.includes("User denied")) {
+                setErrorMessage("Transaction was cancelled");
+            } else if (msg.includes("ContractFunctionExecutionError") || msg.includes("reverted") || msg.includes("Internal JSON-RPC")) {
+                setErrorMessage("Network is busy. Please wait a moment and try again.");
+            } else if (msg.includes("insufficient funds")) {
+                setErrorMessage("Insufficient funds for this transaction");
+            } else {
+                setErrorMessage("Something went wrong. Please try again.");
+            }
         }
     };
 
@@ -204,6 +216,14 @@ export default function CreatePledgeModal({ onClose, onSuccess }: CreatePledgeMo
                             </div>
                         </div>
                     </div>
+
+                    {/* Error Message */}
+                    {errorMessage && (
+                        <div className="bg-yellow-900/30 border border-yellow-600 rounded-xl p-4 mb-6 text-center">
+                            <p className="text-yellow-400 font-medium">⚠️ {errorMessage}</p>
+                            <p className="text-gray-400 text-sm mt-1">Click the button below to try again</p>
+                        </div>
+                    )}
 
                     {/* Action Buttons */}
                     <div className="flex gap-3">

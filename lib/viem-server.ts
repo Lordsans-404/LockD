@@ -1,10 +1,16 @@
-import { createPublicClient, createWalletClient, http } from "viem";
+import { createPublicClient, createWalletClient, http, fallback } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
-import { sepolia } from "viem/chains";
+import { arbitrumSepolia } from "viem/chains";
+
+// Use fallback transport for reliability
+const transport = fallback([
+  http('https://sepolia-rollup.arbitrum.io/rpc'), // Official Arbitrum RPC
+  http(process.env.RPC_URL!), // User's RPC as fallback
+]);
 
 export const publicClient = createPublicClient({
-  chain: sepolia,
-  transport: http(process.env.RPC_URL!),
+  chain: arbitrumSepolia,
+  transport,
 });
 
 // Validate SIGNER_PRIVATE_KEY
@@ -24,7 +30,7 @@ const formattedPrivateKey = privateKey.startsWith("0x")
 const account = privateKeyToAccount(formattedPrivateKey as `0x${string}`);
 
 export const signerClient = createWalletClient({
-  chain: sepolia,
-  transport: http(process.env.RPC_URL!),
+  chain: arbitrumSepolia,
+  transport, // Use same fallback transport
   account,
 });

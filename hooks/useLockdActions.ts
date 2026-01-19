@@ -27,6 +27,7 @@ export function useLockDActions() {
       functionName: "createPledge",
       args: [params.targetDays, params.sessionDuration],
       value: params.stakeAmount,
+      gas: 200_000n, // Explicit gas limit for Arbitrum
     });
 
     const receipt = await publicClient.waitForTransactionReceipt({ hash });
@@ -81,6 +82,7 @@ export function useLockDActions() {
       address: LOCKD_ADDRESS,
       functionName: "checkIn",
       args: [params.pledgeId, params.signature],
+      gas: 150_000n, // Explicit gas limit for Arbitrum
     });
   }
 
@@ -93,6 +95,7 @@ export function useLockDActions() {
       address: LOCKD_ADDRESS,
       functionName: "startRedemption",
       args: [pledgeId],
+      gas: 150_000n, // Explicit gas limit for Arbitrum
     });
   }
 
@@ -104,6 +107,7 @@ export function useLockDActions() {
       address: LOCKD_ADDRESS,
       functionName: "claimPledge",
       args: [pledgeId],
+      gas: 150_000n, // Explicit gas limit for Arbitrum
     });
   }
 
@@ -115,6 +119,7 @@ export function useLockDActions() {
       address: LOCKD_ADDRESS,
       functionName: "surrender",
       args: [pledgeId],
+      gas: 150_000n, // Explicit gas limit for Arbitrum
     });
   }
 
